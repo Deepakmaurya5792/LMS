@@ -1,143 +1,182 @@
 import React, { useEffect } from 'react'
-
-import { FaEdit } from "react-icons/fa";
-
-import { useNavigate } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
-import axios from 'axios';
-import { serverUrl } from '../../App';
-import { toast } from 'react-toastify';
-import { setCreatorCourseData } from '../../redux/courseSlice';
+import { FiEdit, FiPlus, FiArrowLeft } from "react-icons/fi"
+import { useNavigate } from 'react-router-dom'
+import { useDispatch, useSelector } from 'react-redux'
+import axios from 'axios'
+import { serverUrl } from '../../App'
+import { toast } from 'react-toastify'
+import { setCreatorCourseData } from '../../redux/courseSlice'
 import img1 from "../../assets/empty.jpg"
-import { FaArrowLeftLong } from "react-icons/fa6";
+
 function Courses() {
-
-  let navigate = useNavigate()
-  let dispatch = useDispatch()
-
+  const navigate = useNavigate()
+  const dispatch = useDispatch()
   const { creatorCourseData } = useSelector(state => state.course)
 
   useEffect(() => {
     const getCreatorData = async () => {
       try {
         const result = await axios.get(serverUrl + "/api/course/getcreatorcourses", { withCredentials: true })
-
         await dispatch(setCreatorCourseData(result.data))
-
-
         console.log(result.data)
-
       } catch (error) {
         console.log(error)
         toast.error(error.response.data.message)
       }
-
     }
     getCreatorData()
   }, [])
 
-
-
   return (
-    <div className="flex min-h-screen bg-gray-100">
+    <div style={{ background: 'var(--color-bg)', minHeight: '100vh', paddingTop: 80 }}>
+      <div style={{ maxWidth: 1100, margin: '0 auto', padding: '32px 24px' }}>
 
-
-      <div className="w-[100%] min-h-screen p-4 sm:p-6   bg-gray-100">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-3 ">
-          <div className='flex items-center justify-center gap-3'><FaArrowLeftLong className=' w-[22px] h-[22px] cursor-pointer' onClick={() => navigate("/dashboard")} />
-            <h1 className="text-xl font-semibold">Courses</h1>
+        {/* Header */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 28, flexWrap: 'wrap', gap: 12 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <button onClick={() => navigate("/dashboard")} className="btn btn-ghost btn-sm" style={{ gap: 6 }}>
+              <FiArrowLeft size={15} /> Dashboard
+            </button>
+            <div style={{ height: 20, width: 1, background: 'var(--color-border)' }} />
+            <h1 style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--color-text)' }}>My Courses</h1>
+            {creatorCourseData?.length > 0 && (
+              <span className="badge badge-neutral">{creatorCourseData.length}</span>
+            )}
           </div>
-
-          <button className="bg-[black] text-white px-4 py-2 rounded hover:bg-gray-500" onClick={() => navigate("/createcourses")}>
-            Create Course
+          <button className="btn btn-primary btn-sm" onClick={() => navigate("/createcourses")} style={{ gap: 6 }}>
+            <FiPlus size={16} /> New Course
           </button>
         </div>
 
-        {/* For larger screens (table layout) */}
-
-        <div className="hidden md:block bg-white rounded-xl shadow p-4 overflow-x-auto">
-          <table className="min-w-full text-sm">
-            <thead className="border-b bg-gray-50">
-              <tr>
-                <th className="text-left py-3 px-4">Course</th>
-                <th className="text-left py-3 px-4">Price</th>
-                <th className="text-left py-3 px-4">Status</th>
-                <th className="text-left py-3 px-4">Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {creatorCourseData?.map((course, index) => (
-
-                <tr key={index}
-
-                  className="border-b hover:bg-gray-50 transition duration-200"
-                >
-                  <td className="py-3 px-4 flex items-center gap-4">
-                    {course?.thumbnail ? <img
-                      src={course?.thumbnail}
-                      alt=""
-                      className="w-25 h-14 object-cover rounded-md"
-                    /> : <img src={img1} alt='' className="w-14 h-14 object-cover rounded-md object-fit" />}
-                    <span>{course?.title}</span>
-                  </td>
-                  {course?.price ? <td className="py-3 px-4">₹{course?.price}</td> : <td className="py-3 px-4">₹ NA</td>}
-                  <td className="py-3 px-4">
-                    <span className={`  px-3 py-1 rounded-full text-xs ${course?.isPublished ? "text-green-600 bg-green-100" : "text-red-600 bg-red-100"}`}>
-                      {course?.isPublished ? "Published" : "Draft"}
-                    </span>
-                  </td>
-                  <td className="py-3 px-4">
-                    <FaEdit className="text-gray-600 hover:text-blue-600 cursor-pointer" onClick={() => navigate(`/addcourses/${course?._id}`)} />
-                  </td>
-                </tr>
-              ))
-              }
-            </tbody>
-          </table>
-          <p className="text-center text-sm text-gray-400 mt-6">
-            A list of your recent courses.
-          </p>
-        </div>
-
-
-        <div className="md:hidden space-y-4">
-          {creatorCourseData?.map((course, index) => (
-            <div key={index}
-
-              className="bg-white rounded-lg shadow p-4 flex flex-col gap-3 "
-            >
-              <div className="flex gap-4 items-center">
-                {course?.thumbnail ? <img
-                  src={course?.thumbnail}
-                  alt=""
-                  className="w-16 h-16 rounded-md object-cover"
-                /> : <img
-                  src={img1}
-                  alt=""
-                  className="w-16 h-16 rounded-md object-cover"
-                />}
-                <div className="flex-1">
-                  <h2 className="font-medium text-sm">{course?.title}</h2>
-                  {course?.price ? <p className="text-gray-600 text-xs mt-1">₹{course?.price}</p> : <p className="text-gray-600 text-xs mt-1">₹ NA</p>}
+        {/* Desktop Table */}
+        <div className="animate-fade-in" style={{
+          background: 'var(--color-surface)', border: '1px solid var(--color-border)',
+          borderRadius: 'var(--radius-xl)', overflow: 'hidden'
+        }}>
+          {creatorCourseData?.length === 0 ? (
+            <EmptyState onCreateClick={() => navigate("/createcourses")} />
+          ) : (
+            <>
+              {/* Desktop table */}
+              <div className="hidden md:block" style={{ overflowX: 'auto' }}>
+                <table className="table-root">
+                  <thead>
+                    <tr>
+                      <th>Course</th>
+                      <th>Category</th>
+                      <th>Price</th>
+                      <th>Status</th>
+                      <th>Students</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {creatorCourseData?.map((course, index) => (
+                      <tr key={index}>
+                        <td>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                            <img
+                              src={course?.thumbnail || img1}
+                              alt=""
+                              style={{ width: 52, height: 36, objectFit: 'cover', borderRadius: 'var(--radius-sm)', border: '1px solid var(--color-border)', flexShrink: 0 }}
+                            />
+                            <span style={{ fontWeight: 500, color: 'var(--color-text)', fontSize: '0.875rem', maxWidth: 220 }}>{course?.title}</span>
+                          </div>
+                        </td>
+                        <td>
+                          <span className="badge badge-neutral" style={{ textTransform: 'none', fontSize: '0.72rem' }}>{course?.category || 'N/A'}</span>
+                        </td>
+                        <td>
+                          <span style={{ fontWeight: 600, color: 'var(--color-text)' }}>
+                            {course?.price ? `₹${course.price}` : <span style={{ color: 'var(--color-text-muted)' }}>N/A</span>}
+                          </span>
+                        </td>
+                        <td>
+                          <span className={`badge ${course?.isPublished ? 'badge-success' : 'badge-warning'}`}>
+                            {course?.isPublished ? '● Published' : '○ Draft'}
+                          </span>
+                        </td>
+                        <td style={{ color: 'var(--color-text)' }}>
+                          {course.enrolledStudents?.length || 0}
+                        </td>
+                        <td>
+                          <button
+                            className="btn btn-ghost btn-sm"
+                            onClick={() => navigate(`/addcourses/${course?._id}`)}
+                            style={{ gap: 6 }}
+                          >
+                            <FiEdit size={14} /> Edit
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+                <div style={{ padding: '12px 16px', borderTop: '1px solid var(--color-border)' }}>
+                  <p style={{ fontSize: '0.78rem', color: 'var(--color-text-muted)' }}>
+                    Showing {creatorCourseData?.length} course{creatorCourseData?.length !== 1 ? 's' : ''}
+                  </p>
                 </div>
-                <FaEdit className="text-gray-600 hover:text-blue-600 cursor-pointer" onClick={() => navigate(`/addcourses/${course?._id}`)} />
               </div>
-              <span className={` w-fit px-3 py-1 text-xs rounded-full  ${course?.isPublished ? "text-green-600 bg-green-100" : "text-red-600 bg-red-100"}`}>
-                {course?.isPublished ? "Published" : "Draft"}
-              </span>
-            </div>
-          ))}
-          <p className="text-center text-sm text-gray-400 mt-4 pl-[80px]">
-            A list of your recent courses.
-          </p>
 
+              {/* Mobile card list */}
+              <div className="md:hidden" style={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                {creatorCourseData?.map((course, index) => (
+                  <div key={index} style={{
+                    padding: 16, borderBottom: '1px solid rgba(255,255,255,0.04)',
+                    display: 'flex', gap: 14, alignItems: 'flex-start'
+                  }}>
+                    <img
+                      src={course?.thumbnail || img1}
+                      alt=""
+                      style={{ width: 64, height: 44, objectFit: 'cover', borderRadius: 'var(--radius-sm)', border: '1px solid var(--color-border)', flexShrink: 0 }}
+                    />
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <p style={{ fontWeight: 600, color: 'var(--color-text)', fontSize: '0.875rem', marginBottom: 6 }}>{course?.title}</p>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                        <span className={`badge ${course?.isPublished ? 'badge-success' : 'badge-warning'}`}>
+                          {course?.isPublished ? 'Published' : 'Draft'}
+                        </span>
+                        {course?.price && <span style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)', fontWeight: 600 }}>₹{course.price}</span>}
+                      </div>
+                    </div>
+                    <button
+                      className="btn btn-ghost btn-sm"
+                      onClick={() => navigate(`/addcourses/${course?._id}`)}
+                      style={{ flexShrink: 0, padding: '6px 10px' }}
+                    >
+                      <FiEdit size={14} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
         </div>
-
-
       </div>
     </div>
-  );
+  )
+}
 
+function EmptyState({ onCreateClick }) {
+  return (
+    <div style={{ padding: 64, textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16 }}>
+      <div style={{
+        width: 56, height: 56, borderRadius: 'var(--radius-lg)',
+        background: 'var(--color-surface-3)', border: '1px solid var(--color-border)',
+        display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 8
+      }}>
+        <FiEdit size={24} style={{ color: 'var(--color-text-muted)' }} />
+      </div>
+      <h3 style={{ fontSize: '1rem', fontWeight: 600, color: 'var(--color-text)' }}>No courses yet</h3>
+      <p style={{ fontSize: '0.875rem', color: 'var(--color-text-muted)', maxWidth: 300 }}>
+        Create your first course to start sharing your knowledge with the world.
+      </p>
+      <button className="btn btn-primary btn-sm" onClick={onCreateClick} style={{ marginTop: 8, gap: 6 }}>
+        <FiPlus size={16} /> Create First Course
+      </button>
+    </div>
+  )
 }
 
 export default Courses

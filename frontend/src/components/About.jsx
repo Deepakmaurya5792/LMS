@@ -1,34 +1,95 @@
 import React from 'react'
 import about from "../assets/about.jpg"
-import VideoPlayer from './VideoPlayer'
-import { TfiLayoutLineSolid } from "react-icons/tfi";
-import { BiSolidBadgeCheck } from "react-icons/bi";
+import { BiSolidBadgeCheck } from "react-icons/bi"
+
+const FEATURES = [
+  { label: 'Simplified Learning', desc: 'Easy-to-follow lessons' },
+  { label: 'Expert Instructors', desc: 'Industry professionals' },
+  { label: 'Big Experience', desc: 'Years of expertise' },
+  { label: 'Lifetime Access', desc: 'Learn at your pace' },
+]
+
 function About() {
   return (
-    <div className='w-[100vw] lg:h-[70vh] min-h-[50vh] flex flex-wrap items-center justify-center gap-2 mb-[30px]'>
-        <div className='lg:w-[40%] md:w-[80%] w-[100%] h-[100%] flex  items-center justify-center relative' >
-            <img src={about} className='w-[80%] h-[90%] rounded-lg ' alt="" />
-            <VideoPlayer />
+    <section style={{ padding: '80px 0', background: 'var(--color-surface-2)' }}>
+      <div style={{
+        maxWidth: 1200, margin: '0 auto', padding: '0 24px',
+        display: 'flex', flexDirection: 'column', gap: 60,
+        alignItems: 'center'
+      }} className="lg:flex-row">
 
-        </div>
-        <div className='lg:w-[50%] md:w-[70%] w-[100%] h-[100%] flex  items-start justify-center flex-col px-[35px] md:px-[80px]' >
-          <div className='flex text-[18px] items-center justify-center gap-[20px]'>About Us <TfiLayoutLineSolid  className='w-[40px] h-[40px]'/> </div>
-          <div className='md:text-[45px] text-[35px] font-semibold'>We Are Maximize Your Learning Growth</div>
-          <div className='text-[15px] '>We provide a modern Learning Management System to simplify online education, track progress, and enhance student-instructor collaboration efficiently.</div>
-          <div className=' w-[100%] lg:w-[60%]'>
-            <div className='flex items-center justify-between  mt-[40px]'>
-              <div className='flex items-center justify-center gap-[10px]'><BiSolidBadgeCheck className='w-[20px] h-[20px]'/>Simplified Learning</div>
-              <div className='flex items-center justify-center gap-[10px]'><BiSolidBadgeCheck className='w-[20px] h-[20px]'/>Expert Trainers</div> 
-            </div>
-            <div className='flex items-center justify-between mt-[20px] '>
-              <div className='flex items-center justify-center gap-[10px]'><BiSolidBadgeCheck className='w-[20px] h-[20px]'/>Big Experience</div>
-              <div className='flex items-center justify-center gap-[10px]'><BiSolidBadgeCheck className='w-[20px] h-[20px]'/>Lifetime Access</div>
-
-            </div>
+        {/* Left - Image */}
+        <div style={{ position: 'relative', flexShrink: 0 }} className="lg:w-2/5 w-full">
+          <div style={{
+            position: 'absolute', inset: 0, borderRadius: 'var(--radius-xl)',
+            background: 'linear-gradient(135deg, rgba(124,106,247,0.2), rgba(6,214,160,0.1))',
+            transform: 'rotate(-3deg)', zIndex: 0
+          }} />
+          <img
+            src={about}
+            alt="About us"
+            style={{
+              width: '100%', borderRadius: 'var(--radius-xl)', objectFit: 'cover',
+              position: 'relative', zIndex: 1,
+              border: '1px solid var(--color-border)',
+              boxShadow: 'var(--shadow-lg)'
+            }}
+          />
+          {/* Floating badge */}
+          <div style={{
+            position: 'absolute', bottom: 20, left: -20, zIndex: 2,
+            background: 'var(--color-surface)', border: '1px solid var(--color-border)',
+            borderRadius: 'var(--radius-lg)', padding: '14px 20px',
+            boxShadow: 'var(--shadow-md)'
+          }}>
+            <div style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--color-text)', lineHeight: 1 }}>10K+</div>
+            <div style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', fontWeight: 600, marginTop: 3 }}>Happy Students</div>
           </div>
         </div>
-      
-    </div>
+
+        {/* Right - Content */}
+        <div style={{ flex: 1 }}>
+          <p style={{
+            display: 'inline-block', padding: '4px 14px', borderRadius: 'var(--radius-full)',
+            background: 'rgba(6,214,160,0.1)', border: '1px solid rgba(6,214,160,0.2)',
+            color: 'var(--color-accent-light)', fontSize: '0.75rem', fontWeight: 700,
+            textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 16
+          }}>
+            About Us
+          </p>
+          <h2 style={{
+            fontSize: 'clamp(1.8rem, 4vw, 2.4rem)', fontWeight: 800,
+            letterSpacing: '-0.02em', color: 'var(--color-text)', marginBottom: 16, lineHeight: 1.2
+          }}>
+            We Are Maximizing Your Learning Growth
+          </h2>
+          <p style={{ color: 'var(--color-text-secondary)', lineHeight: 1.75, marginBottom: 32, fontSize: '0.95rem' }}>
+            We provide a modern Learning Management System to simplify online education, track progress, and enhance student-instructor collaboration efficiently.
+          </p>
+
+          {/* Features grid */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+            {FEATURES.map((feat, i) => (
+              <div key={i} style={{
+                display: 'flex', gap: 12, alignItems: 'flex-start',
+                padding: '14px 16px', borderRadius: 'var(--radius-md)',
+                background: 'var(--color-surface)', border: '1px solid var(--color-border)',
+                transition: 'all 0.2s'
+              }}
+                onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--color-border-strong)'; e.currentTarget.style.transform = 'translateY(-1px)' }}
+                onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--color-border)'; e.currentTarget.style.transform = 'translateY(0)' }}
+              >
+                <BiSolidBadgeCheck size={20} style={{ color: 'var(--color-accent)', flexShrink: 0, marginTop: 1 }} />
+                <div>
+                  <p style={{ fontWeight: 700, fontSize: '0.875rem', color: 'var(--color-text)', marginBottom: 2 }}>{feat.label}</p>
+                  <p style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>{feat.desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </section>
   )
 }
 

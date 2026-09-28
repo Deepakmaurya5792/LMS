@@ -1,373 +1,423 @@
-import axios from 'axios';
+import axios from 'axios'
 import React, { useEffect, useState } from 'react'
-import { useDispatch, useSelector } from 'react-redux';
-import { useNavigate, useParams } from 'react-router-dom';
-import { serverUrl } from '../App';
-import { FaArrowLeftLong } from "react-icons/fa6";
+import { useDispatch, useSelector } from 'react-redux'
+import { useNavigate, useParams } from 'react-router-dom'
+import { serverUrl } from '../App'
 import img from "../assets/empty.jpg"
 import Card from "../components/Card.jsx"
-import { setSelectedCourseData } from '../redux/courseSlice';
-import { FaLock, FaPlayCircle } from "react-icons/fa";
-import { toast } from 'react-toastify';
-import { FaStar } from "react-icons/fa6";
-
+import { setSelectedCourseData } from '../redux/courseSlice'
+import { FaLock, FaPlayCircle } from "react-icons/fa"
+import { toast } from 'react-toastify'
+import { FaStar } from "react-icons/fa6"
+import { FiArrowLeft, FiCheck, FiClock, FiPlay } from 'react-icons/fi'
+import { HiSparkles } from 'react-icons/hi2'
 
 function ViewCourse() {
-
-      const { courseId } = useParams();
-      const navigate = useNavigate()
-    const {courseData} = useSelector(state=>state.course)
-    const {userData} = useSelector(state=>state.user)
-    const [creatorData , setCreatorData] = useState(null)
-    const dispatch = useDispatch()
-    const [selectedLecture, setSelectedLecture] = useState(null);
-    const {lectureData} = useSelector(state=>state.lecture)
-    const {selectedCourseData} = useSelector(state=>state.course)
-  const [selectedCreatorCourse,setSelectedCreatorCourse] = useState([])
-   const [isEnrolled, setIsEnrolled] = useState(false);
-   const [rating, setRating] = useState(0);
-   const [comment, setComment] = useState("");
-   
-   
-  
-
+  const { courseId } = useParams()
+  const navigate = useNavigate()
+  const { courseData } = useSelector(state => state.course)
+  const { userData } = useSelector(state => state.user)
+  const [creatorData, setCreatorData] = useState(null)
+  const dispatch = useDispatch()
+  const [selectedLecture, setSelectedLecture] = useState(null)
+  const { lectureData } = useSelector(state => state.lecture)
+  const { selectedCourseData } = useSelector(state => state.course)
+  const [selectedCreatorCourse, setSelectedCreatorCourse] = useState([])
+  const [isEnrolled, setIsEnrolled] = useState(false)
+  const [rating, setRating] = useState(0)
+  const [comment, setComment] = useState("")
+  const [hoverRating, setHoverRating] = useState(0)
 
   const handleReview = async () => {
     try {
-      const result = await axios.post(serverUrl + "/api/review/givereview" , {rating , comment , courseId} , {withCredentials:true})
+      const result = await axios.post(serverUrl + "/api/review/givereview", { rating, comment, courseId }, { withCredentials: true })
       toast.success("Review Added")
       console.log(result.data)
       setRating(0)
       setComment("")
-
     } catch (error) {
       console.log(error)
       toast.error(error.response.data.message)
     }
   }
-  
 
   const calculateAverageRating = (reviews) => {
-  if (!reviews || reviews.length === 0) return 0;
+    if (!reviews || reviews.length === 0) return 0
+    const total = reviews.reduce((sum, review) => sum + review.rating, 0)
+    return (total / reviews.length).toFixed(1)
+  }
 
-  const total = reviews.reduce((sum, review) => sum + review.rating, 0);
-  return (total / reviews.length).toFixed(1); // rounded to 1 decimal
-};
-
-// Usage:
-const avgRating = calculateAverageRating(selectedCourseData?.reviews);
-console.log("Average Rating:", avgRating);
-
-  
+  const avgRating = calculateAverageRating(selectedCourseData?.reviews)
 
   const fetchCourseData = async () => {
     courseData.map((item) => {
       if (item._id === courseId) {
-      dispatch(setSelectedCourseData(item))
-        console.log(selectedCourseData)
-      
-
-        return null;
+        dispatch(setSelectedCourseData(item))
+        return null
       }
-
     })
-
   }
-    const checkEnrollment = () => {
-  const verify = userData?.enrolledCourses?.some(c => {
-    const enrolledId = typeof c === 'string' ? c : c._id;
-    return enrolledId?.toString() === courseId?.toString();
-  });
 
-  console.log("Enrollment verified:", verify);
-  if (verify) {
-    setIsEnrolled(true);
+  const checkEnrollment = () => {
+    const verify = userData?.enrolledCourses?.some(c => {
+      const enrolledId = typeof c === 'string' ? c : c._id
+      return enrolledId?.toString() === courseId?.toString()
+    })
+    console.log("Enrollment verified:", verify)
+    if (verify) { setIsEnrolled(true) }
   }
-};
+
   useEffect(() => {
     fetchCourseData()
     checkEnrollment()
-  }, [courseId,courseData,lectureData])
+  }, [courseId, courseData, lectureData])
 
-
-    // Fetch creator info once course data is available
   useEffect(() => {
     const getCreator = async () => {
       if (selectedCourseData?.creator) {
         try {
-          const result = await axios.post(
-            `${serverUrl}/api/course/getcreator`,
-            { userId: selectedCourseData.creator },
-            { withCredentials: true }
-          );
-          setCreatorData(result.data);
-          console.log(result.data)
+          const result = await axios.post(`${serverUrl}/api/course/getcreator`, { userId: selectedCourseData.creator }, { withCredentials: true })
+          setCreatorData(result.data)
         } catch (error) {
-          console.error("Error fetching creator:", error);
+          console.error("Error fetching creator:", error)
         }
       }
-    };
-
-    getCreator();
-
-    
-  }, [selectedCourseData]);
-
-
-   
-
+    }
+    getCreator()
+  }, [selectedCourseData])
 
   useEffect(() => {
-  if (creatorData?._id && courseData.length > 0) {
-    const creatorCourses = courseData.filter(
-      (course) =>
-        course.creator === creatorData._id && course._id !== courseId // Exclude current course
-    );
-    setSelectedCreatorCourse(creatorCourses);
-  
-  }
-}, [creatorData, courseData]);
+    if (creatorData?._id && courseData.length > 0) {
+      const creatorCourses = courseData.filter(
+        (course) => course.creator === creatorData._id && course._id !== courseId
+      )
+      setSelectedCreatorCourse(creatorCourses)
+    }
+  }, [creatorData, courseData])
 
- 
-const handleEnroll = async (courseId, userId) => {
-  try {
-    // 1. Create Order
-    const orderData = await axios.post(serverUrl + "/api/payment/create-order", {
-      courseId,
-      userId
-    } , {withCredentials:true});
-    console.log(orderData)
-
-    const options = {
-      key: import.meta.env.VITE_RAZORPAY_KEY_ID, // from .env
-      amount: orderData.data.amount,
-      currency: "INR",
-      name: "Virtual Courses",
-      description: "Course Enrollment Payment",
-      order_id: orderData.data.id,
-      handler: async function (response) {
-  console.log("Razorpay Response:", response);
-  try {
-    const verifyRes = await axios.post(serverUrl + "/api/payment/verify-payment",{
-  ...response,       
-  courseId,
-  userId
-}, { withCredentials: true });
-    
-setIsEnrolled(true)
-    toast.success(verifyRes.data.message);
-  } catch (verifyError) {
-    toast.error("Payment verification failed.");
-    console.error("Verification Error:", verifyError);
+  const handleEnroll = async (courseId, userId) => {
+    try {
+      const orderData = await axios.post(serverUrl + "/api/payment/create-order", { courseId, userId }, { withCredentials: true })
+      const options = {
+        key: import.meta.env.VITE_RAZORPAY_KEY_ID,
+        amount: orderData.data.amount,
+        currency: "INR",
+        name: "Virtual Courses",
+        description: "Course Enrollment Payment",
+        order_id: orderData.data.id,
+        handler: async function (response) {
+          try {
+            const verifyRes = await axios.post(serverUrl + "/api/payment/verify-payment", { ...response, courseId, userId }, { withCredentials: true })
+            setIsEnrolled(true)
+            toast.success(verifyRes.data.message)
+          } catch (verifyError) {
+            toast.error("Payment verification failed.")
+          }
+        },
+      }
+      const rzp = new window.Razorpay(options)
+      rzp.open()
+    } catch (err) {
+      toast.error("Something went wrong while enrolling.")
+    }
   }
-  },
-    };
-    
-    const rzp = new window.Razorpay(options)
-    rzp.open()
 
-  } catch (err) {
-    toast.error("Something went wrong while enrolling.");
-    console.error("Enroll Error:", err);
-  }
-};
+  const highlights = [
+    { label: '10+ hours of video content' },
+    { label: 'Lifetime access to course materials' },
+    { label: 'Certificate on completion' },
+    { label: 'Access on all devices' },
+  ]
 
   return (
-     <div className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-6xl mx-auto bg-white shadow-md rounded-xl p-6 space-y-6 relative">
+    <div style={{ background: 'var(--color-bg)', minHeight: '100vh', color: 'var(--color-text)' }}>
 
-        {/* Top Section */}
-        <div className="flex flex-col md:flex-row gap-6 ">
-             
-          {/* Thumbnail */}
-          <div className="w-full md:w-1/2">
-             <FaArrowLeftLong  className='text-[black] w-[22px] h-[22px] cursor-pointer' onClick={()=>navigate("/")}/>
-            {selectedCourseData?.thumbnail ? <img
-              src={selectedCourseData?.thumbnail}
-              alt="Course Thumbnail"
-              className="rounded-xl w-full object-cover"
-            /> :  <img
-              src={img}
-              alt="Course Thumbnail"
-              className="rounded-xl  w-full  object-cover"
-            /> }
-          </div>
+      {/* Hero section */}
+      <div style={{
+        background: 'linear-gradient(180deg, rgba(124,106,247,0.12) 0%, var(--color-bg) 100%)',
+        borderBottom: '1px solid var(--color-border)',
+        paddingTop: 80
+      }}>
+        <div style={{ maxWidth: 1100, margin: '0 auto', padding: '32px 24px' }}>
+          <button onClick={() => navigate("/")} className="btn btn-ghost btn-sm" style={{ marginBottom: 20, gap: 6 }}>
+            <FiArrowLeft size={15} /> All Courses
+          </button>
 
-          {/* Course Info */}
-          <div className="flex-1 space-y-2 mt-[20px]">
-            <h1 className="text-2xl font-bold">{selectedCourseData?.title}</h1>
-            <p className="text-gray-600">{selectedCourseData?.subTitle}</p>
-
-            {/* Rating & Price */}
-            <div className="flex items-start flex-col justify-between">
-              <div className="text-yellow-500 font-medium">
-                ⭐ {avgRating} <span className="text-gray-500">(1,200 reviews)</span>
-              </div>
-              <div>
-                <span className="text-lg font-semibold text-black">{selectedCourseData?.price}</span>{" "}
-                <span className="line-through text-sm text-gray-400">₹599</span>
-              </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 32 }} className="md:flex-row">
+            {/* Thumbnail */}
+            <div style={{ flex: 1, maxWidth: 520 }}>
+              <img
+                src={selectedCourseData?.thumbnail || img}
+                alt="Course Thumbnail"
+                style={{ width: '100%', borderRadius: 'var(--radius-xl)', objectFit: 'cover', border: '1px solid var(--color-border)', boxShadow: 'var(--shadow-lg)' }}
+              />
             </div>
 
-            {/* Highlights */}
-            <ul className="text-sm text-gray-700 space-y-1 pt-2">
-              <li>✅ 10+ hours of video content</li>
-              <li>✅ Lifetime access to course materials</li>
-              
-            </ul>
+            {/* Course Info */}
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 16 }}>
+              {/* Badges */}
+              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                <span className="badge badge-primary">{selectedCourseData?.category}</span>
+                {selectedCourseData?.level && <span className="badge badge-neutral">{selectedCourseData.level}</span>}
+              </div>
 
-            {/* Enroll Button */}
-            {!isEnrolled ?<button className="bg-[black] text-white px-6 py-2 rounded hover:bg-gray-700 mt-3" onClick={()=>handleEnroll(courseId , userData._id)}>
-              Enroll Now
-            </button> :
-            <button className="bg-green-200 text-green-600 px-6 py-2 rounded hover:bg-gray-100 hover:border mt-3" onClick={()=>navigate(`/viewlecture/${courseId}`)}>
-             Watch Now
-            </button>
-            }
+              <h1 style={{ fontSize: 'clamp(1.4rem, 3vw, 2rem)', fontWeight: 800, letterSpacing: '-0.02em', lineHeight: 1.25 }}>
+                {selectedCourseData?.title}
+              </h1>
+
+              {selectedCourseData?.subTitle && (
+                <p style={{ color: 'var(--color-text-secondary)', fontSize: '0.95rem', lineHeight: 1.65 }}>
+                  {selectedCourseData.subTitle}
+                </p>
+              )}
+
+              {/* Rating */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <div style={{ display: 'flex', gap: 2 }}>
+                  {[1, 2, 3, 4, 5].map(s => (
+                    <FaStar key={s} style={{ color: s <= Math.round(avgRating) ? '#f59e0b' : 'rgba(255,255,255,0.15)', fontSize: '0.9rem' }} />
+                  ))}
+                </div>
+                <span style={{ fontWeight: 700, color: 'var(--color-text)', fontSize: '0.9rem' }}>{avgRating}</span>
+                <span style={{ color: 'var(--color-text-muted)', fontSize: '0.8rem' }}>
+                  ({selectedCourseData?.reviews?.length || 0} reviews)
+                </span>
+              </div>
+
+              {/* Price + Enroll */}
+              <div style={{
+                background: 'var(--color-surface)', border: '1px solid var(--color-border)',
+                borderRadius: 'var(--radius-xl)', padding: '20px 24px'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, marginBottom: 16 }}>
+                  <span style={{ fontSize: '1.75rem', fontWeight: 800, letterSpacing: '-0.02em' }}>
+                    {selectedCourseData?.price ? `₹${selectedCourseData.price}` : <span style={{ color: 'var(--color-accent)' }}>Free</span>}
+                  </span>
+                  {selectedCourseData?.price && <span style={{ textDecoration: 'line-through', color: 'var(--color-text-muted)', fontSize: '0.9rem' }}>₹599</span>}
+                </div>
+
+                {/* Highlights */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 18 }}>
+                  {highlights.map((h, i) => (
+                    <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: '0.85rem', color: 'var(--color-text-secondary)' }}>
+                      <FiCheck size={14} style={{ color: 'var(--color-accent)', flexShrink: 0 }} />
+                      {h.label}
+                    </div>
+                  ))}
+                </div>
+
+                {!isEnrolled ? (
+                  <button
+                    className="btn btn-primary btn-lg"
+                    style={{ width: '100%' }}
+                    onClick={() => handleEnroll(courseId, userData._id)}
+                  >
+                    <HiSparkles size={16} /> Enroll Now
+                  </button>
+                ) : (
+                  <button
+                    className="btn btn-success btn-lg"
+                    style={{ width: '100%', gap: 8 }}
+                    onClick={() => navigate(`/viewlecture/${courseId}`)}
+                  >
+                    <FiPlay size={16} /> Watch Now
+                  </button>
+                )}
+              </div>
+            </div>
           </div>
         </div>
-
-        {/* What You'll Learn */}
-        <div>
-          <h2 className="text-xl font-semibold mb-2">What You’ll Learn</h2>
-          <ul className="list-disc pl-6 text-gray-700 space-y-1">
-            <li>Learn {selectedCourseData?.category} from Beginning</li>
-            
-          </ul>
-        </div>
-
-        {/* Requirements */}
-        <div>
-          <h2 className="text-xl font-semibold mb-2">Requirements</h2>
-          <p className="text-gray-700">Basic programming knowledge is helpful but not required.</p>
-        </div>
-
-        {/* Who This Course Is For */}
-        <div>
-          <h2 className="text-xl font-semibold mb-2">Who This Course is For</h2>
-          <p className="text-gray-700">
-            Beginners, aspiring developers, and professionals looking to upgrade skills.
-          </p>
-        </div>
-
-        {/* course lecture   */}
-         <div className="flex flex-col md:flex-row gap-6">
-  {/* Left Side - Curriculum */}
-  <div className="bg-white w-full md:w-2/5 p-6 rounded-2xl shadow-lg border border-gray-200">
-    <h2 className="text-xl font-bold mb-1 text-gray-800">Course Curriculum</h2>
-    <p className="text-sm text-gray-500 mb-4">{selectedCourseData?.lectures?.length} Lectures</p>
-
-    <div className="flex flex-col gap-3">
-      {selectedCourseData?.lectures?.map((lecture, index) => (
-        <button
-          key={index}
-          disabled={!lecture.isPreviewFree}
-          onClick={() => {
-            if (lecture.isPreviewFree) {
-              setSelectedLecture(lecture);
-            }
-          }}
-          className={`flex items-center gap-3 px-4 py-3 rounded-lg border transition-all duration-200 text-left ${
-            lecture.isPreviewFree
-              ? "hover:bg-gray-100 cursor-pointer border-gray-300"
-              : "cursor-not-allowed opacity-60 border-gray-200"
-          } ${
-            selectedLecture?.lectureTitle === lecture.lectureTitle
-              ? "bg-gray-100 border-gray-400"
-              : ""
-          }`}
-        >
-          <span className="text-lg text-gray-700">
-            {lecture.isPreviewFree ? <FaPlayCircle /> : <FaLock />}
-          </span>
-          <span className="text-sm font-medium text-gray-800">
-            {lecture.lectureTitle}
-          </span>
-        </button>
-      ))}
-    </div>
-  </div>
-
-  {/* Right Side - Video + Info */}
-  <div className="bg-white w-full md:w-3/5 p-6 rounded-2xl shadow-lg border border-gray-200">
-    <div className="aspect-video w-full rounded-lg overflow-hidden mb-4 bg-black flex items-center justify-center">
-      {selectedLecture?.videoUrl ? (
-        <video
-          src={selectedLecture.videoUrl}
-          controls
-          className="w-full h-full object-cover"
-        />
-      ) : (
-        <span className="text-white text-sm">Select a preview lecture to watch</span>
-      )}
-    </div>
-
-    <h3 className="text-lg font-semibold text-gray-900 mb-1">
-      {selectedLecture?.lectureTitle || "Lecture Title"}
-    </h3>
-    <p className="text-gray-600 text-sm">
-      {selectedCourseData?.title}
-    </p>
-  </div>
-</div>
-<div className="mt-8 border-t pt-6">
-    <h2 className="text-xl font-semibold mb-2">Write a Review</h2>
-    <div className="mb-4">
-      <div className="flex gap-1 mb-2">
-        {[1, 2, 3, 4, 5].map((star) => (
-         
-            <FaStar  key={star}
-            onClick={() => setRating(star)} className={star <= rating ? "fill-yellow-500" : "fill-gray-300"} />
-         
-        ))}
       </div>
-      <textarea
-        value={comment}
-        onChange={(e) => setComment(e.target.value)}
-        placeholder="Write your comment here..."
-        className="w-full border border-gray-300 rounded-lg p-2"
-        rows="3"
-      />
-      <button
-        
-        className="bg-black text-white mt-3 px-4 py-2 rounded hover:bg-gray-800" onClick={handleReview}
-      >
-        Submit Review
-      </button>
-    </div>
 
-        {/* Instructor Info */}
-        <div className="flex items-center gap-4 pt-4 border-t ">
-          {creatorData?.photoUrl ?<img
-            src={creatorData?.photoUrl}
-            alt="Instructor"
-            className="w-16 h-16 rounded-full object-cover"
-          />: <img
-            src={img}
-            alt="Instructor"
-            className="w-16 h-16 rounded-full object-cover"
-          />
-          }
-          <div>
-            <h3 className="text-lg font-semibold">{creatorData?.name}</h3>
-            <p className="md:text-sm text-gray-600 text-[10px] ">{creatorData?.description}</p>
-            <p className="md:text-sm text-gray-600 text-[10px] ">{creatorData?.email}</p>
-            
-          </div>
-        </div>
-        <div>
-          <p className='text-xl font-semibold mb-2'>Other Published Courses by the Educator -</p>
-        <div className='w-full transition-all duration-300 py-[20px]   flex items-start justify-center lg:justify-start flex-wrap gap-6 lg:px-[80px] '>
-          
+      {/* Body */}
+      <div style={{ maxWidth: 1100, margin: '0 auto', padding: '40px 24px' }}>
+
+        {/* What you'll learn + Requirements */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 20, marginBottom: 40 }}>
+          {[
             {
-                selectedCreatorCourse?.map((item,index)=>(
-                    <Card key={index} thumbnail={item.thumbnail} title={item.title} id={item._id} price={item.price} category={item.category}/>
-                ))
+              title: "What You'll Learn",
+              items: [`${selectedCourseData?.category} from scratch`, 'Real-world projects', 'Industry best practices', 'Hands-on exercises']
+            },
+            {
+              title: "Requirements",
+              items: ['Basic computer knowledge', 'No prior coding experience needed', 'Passion to learn']
+            },
+            {
+              title: "Who This Is For",
+              items: ['Beginners starting their journey', 'Professionals upgrading skills', 'Students & graduates']
             }
+          ].map((section, i) => (
+            <div key={i} style={{
+              background: 'var(--color-surface)', border: '1px solid var(--color-border)',
+              borderRadius: 'var(--radius-xl)', padding: 24
+            }}>
+              <h2 style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--color-text)', marginBottom: 16 }}>{section.title}</h2>
+              <ul style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                {section.items.map((item, j) => (
+                  <li key={j} style={{ display: 'flex', alignItems: 'flex-start', gap: 8, fontSize: '0.85rem', color: 'var(--color-text-secondary)' }}>
+                    <FiCheck size={14} style={{ color: 'var(--color-accent)', flexShrink: 0, marginTop: 2 }} />
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
         </div>
+
+        {/* Curriculum + Preview */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16, marginBottom: 40 }} className="md:flex-row">
+          {/* Left - Curriculum */}
+          <div style={{
+            flex: '0 0 auto', width: '100%', maxWidth: 380,
+            background: 'var(--color-surface)', border: '1px solid var(--color-border)',
+            borderRadius: 'var(--radius-xl)', overflow: 'hidden'
+          }}>
+            <div style={{ padding: '18px 20px', borderBottom: '1px solid var(--color-border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <h2 style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--color-text)' }}>Course Curriculum</h2>
+              <span className="badge badge-neutral">{selectedCourseData?.lectures?.length} Lectures</span>
+            </div>
+            <div>
+              {selectedCourseData?.lectures?.map((lecture, index) => {
+                const isActive = selectedLecture?.lectureTitle === lecture.lectureTitle
+                return (
+                  <button
+                    key={index}
+                    disabled={!lecture.isPreviewFree}
+                    onClick={() => lecture.isPreviewFree && setSelectedLecture(lecture)}
+                    style={{
+                      width: '100%', display: 'flex', alignItems: 'center', gap: 12, padding: '12px 20px',
+                      borderBottom: '1px solid rgba(255,255,255,0.04)', textAlign: 'left',
+                      background: isActive ? 'rgba(124,106,247,0.1)' : 'transparent',
+                      border: 'none', cursor: lecture.isPreviewFree ? 'pointer' : 'not-allowed',
+                      opacity: lecture.isPreviewFree ? 1 : 0.5,
+                      transition: 'background 0.15s', fontFamily: 'inherit',
+                      borderLeft: isActive ? '2px solid var(--color-primary)' : '2px solid transparent',
+                    }}
+                    onMouseEnter={e => lecture.isPreviewFree && !isActive && (e.currentTarget.style.background = 'rgba(255,255,255,0.03)')}
+                    onMouseLeave={e => !isActive && (e.currentTarget.style.background = 'transparent')}
+                  >
+                    <span style={{ color: isActive ? 'var(--color-primary-light)' : lecture.isPreviewFree ? 'var(--color-text-muted)' : 'var(--color-text-muted)' }}>
+                      {lecture.isPreviewFree ? <FaPlayCircle size={16} /> : <FaLock size={14} />}
+                    </span>
+                    <span style={{ fontSize: '0.85rem', fontWeight: isActive ? 600 : 400, color: isActive ? 'var(--color-text)' : 'var(--color-text-secondary)', flex: 1 }}>
+                      {lecture.lectureTitle}
+                    </span>
+                    {lecture.isPreviewFree && (
+                      <span style={{ fontSize: '0.7rem', color: 'var(--color-accent)', fontWeight: 600, flexShrink: 0 }}>Free</span>
+                    )}
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+
+          {/* Right - Preview Video */}
+          <div style={{
+            flex: 1, background: 'var(--color-surface)', border: '1px solid var(--color-border)',
+            borderRadius: 'var(--radius-xl)', overflow: 'hidden'
+          }}>
+            <div style={{ aspectRatio: '16/9', background: '#000', position: 'relative' }}>
+              {selectedLecture?.videoUrl ? (
+                <video src={selectedLecture.videoUrl} controls style={{ width: '100%', height: '100%', display: 'block' }} />
+              ) : (
+                <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 12 }}>
+                  <div style={{ width: 56, height: 56, borderRadius: '50%', background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <FiPlay size={22} style={{ color: 'rgba(255,255,255,0.5)', marginLeft: 3 }} />
+                  </div>
+                  <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.8rem' }}>Select a free preview lecture to watch</p>
+                </div>
+              )}
+            </div>
+            <div style={{ padding: '16px 20px' }}>
+              <h3 style={{ fontWeight: 600, color: 'var(--color-text)', fontSize: '0.95rem' }}>
+                {selectedLecture?.lectureTitle || "Select a preview lecture"}
+              </h3>
+            </div>
+          </div>
+        </div>
+
+        {/* Review Section */}
+        <div style={{
+          background: 'var(--color-surface)', border: '1px solid var(--color-border)',
+          borderRadius: 'var(--radius-xl)', padding: 28, marginBottom: 40
+        }}>
+          <h2 style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--color-text)', marginBottom: 20 }}>Write a Review</h2>
+          <div style={{ marginBottom: 14 }}>
+            <label className="input-label" style={{ marginBottom: 8, display: 'block' }}>Your Rating</label>
+            <div style={{ display: 'flex', gap: 4 }}>
+              {[1, 2, 3, 4, 5].map((star) => (
+                <FaStar
+                  key={star}
+                  onClick={() => setRating(star)}
+                  onMouseEnter={() => setHoverRating(star)}
+                  onMouseLeave={() => setHoverRating(0)}
+                  style={{
+                    fontSize: '1.5rem', cursor: 'pointer',
+                    color: star <= (hoverRating || rating) ? '#f59e0b' : 'rgba(255,255,255,0.15)',
+                    transition: 'color 0.1s'
+                  }}
+                />
+              ))}
+            </div>
+          </div>
+          <div style={{ marginBottom: 16 }}>
+            <label className="input-label">Comment</label>
+            <textarea
+              value={comment}
+              onChange={(e) => setComment(e.target.value)}
+              placeholder="Share your experience with this course..."
+              className="input"
+              rows={3}
+              style={{ resize: 'vertical', minHeight: 80 }}
+            />
+          </div>
+          <button className="btn btn-primary" onClick={handleReview} disabled={!rating}>
+            Submit Review
+          </button>
+        </div>
+
+        {/* Instructor */}
+        {creatorData && (
+          <div style={{
+            background: 'var(--color-surface)', border: '1px solid var(--color-border)',
+            borderRadius: 'var(--radius-xl)', padding: 28, marginBottom: 40
+          }}>
+            <h2 style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--color-text)', marginBottom: 18 }}>Your Instructor</h2>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+              {creatorData?.photoUrl
+                ? <img src={creatorData.photoUrl} alt="Instructor" style={{ width: 64, height: 64, borderRadius: '50%', objectFit: 'cover', border: '2px solid var(--color-border-strong)' }} />
+                : <div style={{
+                    width: 64, height: 64, borderRadius: '50%', fontSize: '1.3rem', fontWeight: 800, color: '#fff',
+                    background: 'linear-gradient(135deg, var(--color-primary), var(--color-primary-light))',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center'
+                  }}>
+                    {creatorData?.name?.slice(0, 1).toUpperCase()}
+                  </div>
+              }
+              <div>
+                <h3 style={{ fontWeight: 700, color: 'var(--color-text)', fontSize: '1rem' }}>{creatorData?.name}</h3>
+                {creatorData?.description && <p style={{ fontSize: '0.85rem', color: 'var(--color-text-muted)', marginTop: 4 }}>{creatorData.description}</p>}
+                <p style={{ fontSize: '0.8rem', color: 'var(--color-primary-light)', marginTop: 3 }}>{creatorData?.email}</p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* More by instructor */}
+        {selectedCreatorCourse.length > 0 && (
+          <div>
+            <h2 style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--color-text)', marginBottom: 20 }}>
+              More Courses by This Instructor
+            </h2>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 20 }}>
+              {selectedCreatorCourse.map((item, index) => (
+                <Card key={index} thumbnail={item.thumbnail} title={item.title} id={item._id} price={item.price} category={item.category} />
+              ))}
+            </div>
+          </div>
+        )}
       </div>
-    </div>
-    </div>
     </div>
   )
 }

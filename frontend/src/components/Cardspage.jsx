@@ -1,34 +1,66 @@
 import React, { useEffect, useState } from 'react'
 import Card from "./Card.jsx"
-import { useSelector } from 'react-redux';
-import { SiViaplay } from "react-icons/si";
-import { useNavigate } from 'react-router-dom';
+import { useSelector } from 'react-redux'
+import { SiViaplay } from "react-icons/si"
+import { useNavigate } from 'react-router-dom'
 
 function Cardspage() {
-  const [popularCourses,setPopularCourses] =useState([]);
-  const {courseData} = useSelector(state=>state.course)
+  const [popularCourses, setPopularCourses] = useState([])
+  const { courseData } = useSelector(state => state.course)
   const navigate = useNavigate()
-  useEffect(()=>{
-    setPopularCourses(courseData.slice(0,6));
-    },[courseData])
+
+  useEffect(() => {
+    setPopularCourses(courseData.slice(0, 6))
+  }, [courseData])
+
+  if (popularCourses.length === 0) return null
+
   return (
-    <div className=' relative flex items-center justify-center flex-col'>
-      <h1 className='md:text-[45px] text-[30px] font-semibold text-center mt-[30px] px-[20px]'>Our Popular Courses</h1>
-      <span className='lg:w-[50%] md:w-[80%] text-[15px] text-center mt-[30px] mb-[30px] px-[20px]'>Explore top-rated courses designed to boost your skills, enhance careers, and unlock opportunities in tech, AI, business, and beyond.</span>
-    <div className='w-[100%] min-[100vh] flex items-center justify-center flex-wrap gap-[50px] lg:p-[50px] md:p-[30px] p-[10px] mb-[40px]
+    <section style={{ padding: '80px 0', background: 'var(--color-surface)' }}>
+      <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 24px' }}>
+        {/* Header */}
+        <div style={{ textAlign: 'center', marginBottom: 48 }}>
+          <p style={{
+            display: 'inline-block', padding: '4px 14px', borderRadius: 'var(--radius-full)',
+            background: 'rgba(6,214,160,0.1)', border: '1px solid rgba(6,214,160,0.2)',
+            color: 'var(--color-accent-light)', fontSize: '0.75rem', fontWeight: 700,
+            textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 16
+          }}>
+            Most Popular
+          </p>
+          <h2 style={{
+            fontSize: 'clamp(1.8rem, 4vw, 2.5rem)', fontWeight: 800,
+            letterSpacing: '-0.02em', color: 'var(--color-text)', marginBottom: 12
+          }}>
+            Our Popular Courses
+          </h2>
+          <p style={{ color: 'var(--color-text-secondary)', maxWidth: 520, margin: '0 auto', lineHeight: 1.7 }}>
+            Explore top-rated courses designed to boost your skills, enhance careers, and unlock opportunities in tech, AI, business, and beyond.
+          </p>
+        </div>
 
-    '>
+        {/* Course grid */}
+        <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: 24, marginBottom: 40 }}>
+          {popularCourses.map((item, index) => (
+            <div key={index} className={`animate-fade-in stagger-${Math.min(index + 1, 6)}`} style={{ opacity: 0 }}>
+              <Card id={item._id} thumbnail={item.thumbnail} title={item.title}
+                price={item.price} category={item.category} reviews={item.reviews} />
+            </div>
+          ))}
+        </div>
 
-    
-            {
-                popularCourses.map((item,index)=>(
-                    <Card key={index} id={item._id} thumbnail={item.thumbnail} title={item.title} price={item.price} category={item.category} reviews={item.reviews}  />
-                ))
-            }
-             
-            </div>
-           <button className=' absolute right-[9%] bottom-2 px-[20px] py-[10px] border-2 lg:border-white border-black bg-black lg:text-white text-black rounded-[10px] text-[18px] font-light flex gap-2 cursor-pointer' onClick={()=>navigate("/allcourses")}>View all Courses <SiViaplay className='w-[30px] h-[30px] lg:fill-white fill-black' /></button>
-            </div>
+        {/* View all button */}
+        <div style={{ textAlign: 'center' }}>
+          <button
+            className="btn btn-secondary btn-lg"
+            onClick={() => navigate("/allcourses")}
+            style={{ gap: 10 }}
+          >
+            View All Courses <SiViaplay />
+          </button>
+        </div>
+      </div>
+    </section>
   )
 }
 

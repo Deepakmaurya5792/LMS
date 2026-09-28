@@ -1,33 +1,48 @@
 import React from 'react'
-import { MdCastForEducation } from "react-icons/md";
-import { SiOpenaccess } from "react-icons/si";
-import { FaSackDollar } from "react-icons/fa6";
-import { BiSupport } from "react-icons/bi";
-import { FaUsers } from "react-icons/fa";
+import { MdCastForEducation } from "react-icons/md"
+import { SiOpenaccess } from "react-icons/si"
+import { FaSackDollar } from "react-icons/fa6"
+import { BiSupport } from "react-icons/bi"
+import { FaUsers } from "react-icons/fa"
+
+const ITEMS = [
+  { Icon: MdCastForEducation, label: '20k+ Online Courses', color: '#7c6af7' },
+  { Icon: SiOpenaccess, label: 'Lifetime Access', color: '#06d6a0' },
+  { Icon: FaSackDollar, label: 'Value For Money', color: '#f59e0b' },
+  { Icon: BiSupport, label: 'Lifetime Support', color: '#3b82f6' },
+  { Icon: FaUsers, label: 'Community Support', color: '#ec4899' },
+]
+
 function Logos() {
   return (
-    <div className='w-[100vw] min-h-[90px]  flex items-center justify-center flex-wrap gap-4 md:mb-[50px] '>
-        <div className='flex items-center justify-center gap-2  px-5 py-3   rounded-3xl bg-gray-200 cursor-pointer'>
-            <MdCastForEducation className='w-[35px] h-[35px] fill-[#03394b]' />
-            <span className='text-[#03394b]'>20k+ Online Courses</span>
-        </div>
-        <div className='flex items-center justify-center gap-2  px-5 py-3   rounded-3xl bg-gray-200 cursor-pointer'>
-            <SiOpenaccess className='w-[30px] h-[30px] fill-[#03394b]' />
-            <span className='text-[#03394b]'>Lifetime Access</span>
-        </div>
-        <div className='flex items-center justify-center gap-2  px-5 py-3   rounded-3xl bg-gray-200 cursor-pointer'>
-            <FaSackDollar className='w-[30px] h-[30px] fill-[#03394b]' />
-            <span className='text-[#03394b]'>Value For Money</span>
-        </div>
-        <div className='flex items-center justify-center gap-2  px-5 py-3  rounded-3xl bg-gray-200 cursor-pointer'>
-            <BiSupport className='w-[35px] h-[35px] fill-[#03394b]' />
-            <span className='text-[#03394b]'>Lifetime Support</span>
-        </div>
-        <div className='flex items-center justify-center gap-2  px-5 py-3   rounded-3xl bg-gray-200 cursor-pointer'>
-            <FaUsers className='w-[35px] h-[35px] fill-[#03394b]' />
-            <span className='text-[#03394b]'>Community Support</span>
-        </div>
-      
+    <div style={{
+      background: 'var(--color-surface-2)',
+      borderTop: '1px solid var(--color-border)',
+      borderBottom: '1px solid var(--color-border)',
+      padding: '24px',
+      overflow: 'hidden'
+    }}>
+      <div style={{
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        flexWrap: 'wrap', gap: 12, maxWidth: 900, margin: '0 auto'
+      }}>
+        {ITEMS.map(({ Icon, label, color }, i) => (
+          <div key={i} style={{
+            display: 'flex', alignItems: 'center', gap: 8, padding: '10px 18px',
+            borderRadius: 'var(--radius-full)',
+            background: `${color}0d`,
+            border: `1px solid ${color}22`,
+            transition: 'all 0.2s',
+            cursor: 'default'
+          }}
+            onMouseEnter={e => { e.currentTarget.style.background = `${color}1a`; e.currentTarget.style.borderColor = `${color}44`; e.currentTarget.style.transform = 'translateY(-1px)' }}
+            onMouseLeave={e => { e.currentTarget.style.background = `${color}0d`; e.currentTarget.style.borderColor = `${color}22`; e.currentTarget.style.transform = 'translateY(0)' }}
+          >
+            <Icon style={{ width: 22, height: 22, color }} />
+            <span style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--color-text-secondary)', whiteSpace: 'nowrap' }}>{label}</span>
+          </div>
+        ))}
+      </div>
     </div>
   )
 }

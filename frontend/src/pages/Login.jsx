@@ -49,7 +49,11 @@ function Login() {
       toast.success("Login Successfully")
     } catch (error) {
       console.log(error)
-      toast.error(error.response.data.message)
+      if (error?.code === "auth/invalid-api-key") {
+        toast.error("Please add a valid VITE_FIREBASE_APIKEY in frontend/.env file")
+      } else {
+        toast.error(error.response?.data?.message || error.message || "Google Login failed")
+      }
     }
   }
 

@@ -42,7 +42,8 @@ function Login() {
       const user = response.user
       const name = user.displayName
       const email = user.email
-      const role = ""
+      const role = "student"
+
       const result = await axios.post(serverUrl + "/api/auth/googlesignup", { name, email, role }, { withCredentials: true })
       dispatch(setUserData(result.data))
       navigate("/")

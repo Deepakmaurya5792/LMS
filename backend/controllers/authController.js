@@ -90,9 +90,12 @@ export const googleSignup = async (req,res) => {
         const {name , email , role} = req.body
         let user= await User.findOne({email})
         if(!user){
+            const userRole = (role && (role === "educator" || role === "student")) ? role : "student"
             user = await User.create({
-            name , email ,role
-        })
+                name,
+                email,
+                role: userRole
+            })
         }
         let token =await genToken(user._id)
         res.cookie("token",token,{
@@ -102,13 +105,10 @@ export const googleSignup = async (req,res) => {
             maxAge: 7 * 24 * 60 * 60 * 1000
         })
         return res.status(200).json(user)
-
-
     } catch (error) {
         console.log(error)
-         return res.status(500).json({message:`googleSignup  ${error}`})
+        return res.status(500).json({message: error.message || "Google Signup failed"})
     }
-    
 }
 
 export const sendOtp = async (req,res) => {
